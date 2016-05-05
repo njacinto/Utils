@@ -94,7 +94,7 @@ public class CollectionFilterIterator<T> implements Iterator<T> {
         throw new UnsupportedOperationException("The iterator doesn't allow changes.");
     }
     // </editor-fold>
-    // <editor-fold defaultstate="collapsed" desc="Private methods">
+    // <editor-fold defaultstate="collapsed" desc="Protected methods">
     /**
      * Searches for the next element that matches the filtering conditions and
      * returns it.
@@ -102,7 +102,7 @@ public class CollectionFilterIterator<T> implements Iterator<T> {
      * @return the next element that matches the filtering conditions or null
      *          if no more elements are available
      */
-    private T getNext(){
+    protected T getNext(){
         T tmp;
         while(it.hasNext()){
             if(predicate.test(tmp=it.next())){

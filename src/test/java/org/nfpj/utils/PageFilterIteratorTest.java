@@ -23,66 +23,82 @@
  */
 package org.nfpj.utils;
 
-import java.util.Iterator;
-import java.util.function.Predicate;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import org.nfpj.utils.predicates.TruePredicate;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.nfpj.utils.arrays.ArrayIteratorTestParams;
+import org.nfpj.utils.collections.CollectionIteratorTestParams;
 
 /**
  *
  * @author njacinto
  */
-public abstract class PageFilterIteratorTest extends PageIteratorTest {
+@RunWith(Parameterized.class)
+public class PageFilterIteratorTest {
+    @Parameterized.Parameters(name = "{index}: {1}")
+    public static Collection<Object[]> data() {
+        List<Object[]> data = new LinkedList<>();
+        for(IteratorTestFactory factory : CollectionIteratorTestParams.data()){
+            if(factory instanceof PageFilterIteratorTestFactory){
+                data.add(new Object[]{ factory, factory.getName() });
+            }
+        }
+        for(IteratorTestFactory factory : ArrayIteratorTestParams.data()){
+            if(factory instanceof PageFilterIteratorTestFactory){
+                data.add(new Object[]{ factory, factory.getName() });
+            }
+        }
+        return data;
+    }
     
-    protected abstract PageIterator<Character> getIterator(int fromIndex, int toIndex, 
-            Predicate<Character> filter, Character ... values);
-    
-    public PageFilterIteratorTest() {
+    protected final PageFilterIteratorTestFactory factory;
+    protected final String name;
+
+    public PageFilterIteratorTest(PageFilterIteratorTestFactory factory, String name) {
+        this.factory = factory;
+        this.name = name;
     }
     
     @Before
-    @Override
     public void setUp() {
-        super.setUp();
     }
     
     @After
-    @Override
     public void tearDown() {
-        super.tearDown();
     }
     
     @Test
     public void testFilter(){
-        Character[] array = new Character[]{'a', 'b', 'c'};
-        Character[] expected = new Character[]{'b'};
-        Iterator<Character> instance = getIterator(0, array.length, new Predicate<Character>() {
-            @Override
-            public boolean test(Character t) {
-                return t=='b';
-            }
-        }, array);
-        int i=0;
-        while(instance.hasNext()){
-            assertEquals("Value on iterator don't match value expected",
-                    expected[i++], instance.next());
-        }
-        assertEquals("Number of elements expected is not correct", 
-                expected.length, i);
+        Character[] array = new Character[]{'a', 'b', 'c', 'd'};
+        Character[] expected = new Character[]{'b', 'c'};
+        FilterIteratorTest.testFilter(factory.get(0, array.length, new FilterIteratorTest.ExpectedFilterPredicate(expected), array), array, expected);
     }
     
-    // Protected
-    protected PageIterator<Character> getIterator(int fromIndex, int toIndex, Character ... values) {
-        return getIterator(fromIndex, toIndex, TruePredicate.INSTANCE, values);
+    @Test
+    public void testFilter_beginning(){
+        Character[] array = new Character[]{'a', 'b', 'c', 'd'};
+        Character[] expected = new Character[]{'a', 'b'};
+        FilterIteratorTest.testFilter(factory.get(0, array.length, new FilterIteratorTest.ExpectedFilterPredicate(expected), array), array, expected);
     }
     
-
-    @Override
-    protected Iterator<Character> getIterator(Character ... values) {
-        return getIterator(0, (values==null || values.length==0 ? 1 : values.length), 
-                TruePredicate.INSTANCE, values);
+    @Test
+    public void testFilter_End(){
+        Character[] array = new Character[]{'a', 'b', 'c', 'd'};
+        Character[] expected = new Character[]{'c', 'd'};
+        FilterIteratorTest.testFilter(factory.get(0, array.length, new FilterIteratorTest.ExpectedFilterPredicate(expected), array), array, expected);
     }
+    
+    @Test
+    public void testFilter_WithPage(){
+        Character[] array = new Character[]{'a', 'b', 'c', 'd', 'e', 'f'};
+        Character[] filterOptions = new Character[]{'a', 'b', 'c'};
+        Character[] expected = new Character[]{'c'};
+        FilterIteratorTest.testFilter(factory.get(2, 4, new FilterIteratorTest.ExpectedFilterPredicate(filterOptions), array), array, expected);
+    }
+    
 }

@@ -23,9 +23,9 @@
  */
 package org.nfpj.utils.arrays;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
+import org.nfpj.utils.PageIterator;
 import org.nfpj.utils.predicates.TruePredicate;
 
 /**
@@ -33,38 +33,84 @@ import org.nfpj.utils.predicates.TruePredicate;
  * @author njacinto
  * @param <T> the type of object being returned by this iterator
  */
-public class ArrayFilterIterator<T> implements Iterator<T> {
+public class ArrayPageFilterIterator<T> implements PageIterator<T> {
     protected static final int END_OF_ITERATION = -2;
     //
     private int nextIndex;
     //
     protected final T[] array;
     protected final Predicate<T> predicate;
+    protected final int fromIndex;
+    protected final int toIndex;
+    protected int countElements = 0;
 
     // <editor-fold defaultstate="expanded" desc="Constructors">
     /**
      * Creates an instance of this class
      * 
      * @param array the array from where this instance will extract the elements
+     * @param fromIndex
+     * @param toIndex
      * @param predicate the filter to be applied to the elements
      */
-    public ArrayFilterIterator(T[] array, Predicate<T> predicate) {
-        this(array, predicate, -1);
+    public ArrayPageFilterIterator(T[] array, int fromIndex, int toIndex, 
+            Predicate<T> predicate) {
+        this(array, fromIndex, toIndex, predicate, -1);
     }
     
     /**
      * 
-     * @param array
-     * @param predicate 
-     * @param prevIndex 
+     * @param array the array from where this instance will extract the elements
+     * @param fromIndex
+     * @param toIndex
+     * @param predicate the filter to be applied to the elements
+     * @param prevIndex the index of the previous element. -1 for ascending 
+     *              interaction starting on the first element
      */
-    protected ArrayFilterIterator(T[] array, Predicate<T> predicate, int prevIndex) {
+    protected ArrayPageFilterIterator(T[] array, int fromIndex, int toIndex, 
+            Predicate<T> predicate, int prevIndex) {
+        if(fromIndex>=toIndex){
+            throw new IllegalArgumentException("fromIndex cannot be bigger or equal to toIndex");
+        }
         this.array = array!=null ? array : ArrayUtil.empty();
         this.predicate = predicate!=null ? predicate : TruePredicate.getInstance();
+        this.fromIndex = fromIndex<0 ? 0 : fromIndex;
+        this.toIndex = toIndex;
         this.nextIndex = getNextIndex(prevIndex);
     }
     // </editor-fold>
     // <editor-fold defaultstate="expanded" desc="Public methods">
+    /**
+     * {@inheritDoc} 
+     */
+    @Override
+    public int getFromIndex() {
+        return fromIndex;
+    }
+
+    /**
+     * {@inheritDoc} 
+     */
+    @Override
+    public int getToIndex() {
+        return toIndex;
+    }
+
+    /**
+     * {@inheritDoc} 
+     */
+    @Override
+    public int getPage() {
+        return (fromIndex/(toIndex-fromIndex))+1;
+    }
+
+    /**
+     * {@inheritDoc} 
+     */
+    @Override
+    public int getPageSize() {
+        return (nextIndex!=END_OF_ITERATION)? -1 : countElements-fromIndex;
+    }
     
     /**
      * {@inheritDoc}
@@ -82,9 +128,9 @@ public class ArrayFilterIterator<T> implements Iterator<T> {
         if(nextIndex==END_OF_ITERATION){
             throw new NoSuchElementException("The underline collection has no elements.");
         }
-        int index = nextIndex;
+        T value = array[nextIndex];
         nextIndex = getNextIndex(nextIndex);
-        return array[index];
+        return value;
     }
 
     /**
@@ -100,19 +146,22 @@ public class ArrayFilterIterator<T> implements Iterator<T> {
      * Searches for the next element that matches the filtering conditions and
      * returns it.
      * 
-     * @param currIndex
      * @return the next element that matches the filtering conditions or null
      *          if no more elements are available
      */
     protected int getNextIndex(int currIndex){
-        if(currIndex!=END_OF_ITERATION){
+        if(currIndex!=END_OF_ITERATION && countElements<toIndex){
             for(int i=currIndex+1; i<array.length; i++){
                 if(predicate.test(array[i])){
-                    return i;
+                    countElements++;
+                    if(countElements>fromIndex){
+                        return i;
+                    }
                 }
             }
         }
         return END_OF_ITERATION;
     }
     // </editor-fold>
+
 }

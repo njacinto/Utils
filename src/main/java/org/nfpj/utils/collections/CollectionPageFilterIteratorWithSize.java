@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.nfpj.utils.arrays;
+package org.nfpj.utils.collections;
 
+import java.util.Iterator;
 import java.util.function.Predicate;
 import org.nfpj.utils.IteratorWithSize;
 
@@ -31,62 +32,63 @@ import org.nfpj.utils.IteratorWithSize;
  * @author njacinto
  * @param <T> the type of object being returned by this iterator
  */
-public class ArrayPagedFilterIteratorWithSize<T> extends ArrayPagedFilterIterator<T> implements IteratorWithSize<T> {
+public class CollectionPageFilterIteratorWithSize<T> extends CollectionPageFilterIterator<T> implements IteratorWithSize<T> {
     
     // <editor-fold defaultstate="expanded" desc="Constructors">
     /**
      * Creates an instance of this class
      * 
-     * @param array the array from where this instance will extract the elements
+     * @param it the iterator from where this instance will extract the elements
      * @param offset
      * @param count
      * @param predicate the filter to be applied to the elements
      */
-    public ArrayPagedFilterIteratorWithSize(T[] array, int offset, int count, Predicate<T> predicate) {
-        super(array, offset, count, predicate);
+    public CollectionPageFilterIteratorWithSize(Iterator<T> it, int offset, int count, Predicate<T> predicate) {
+        super(it, offset, count, predicate);
+    }
+
+    /**
+     * Creates an instance of this class
+     * 
+     * @param collection the collection from where this instance will extract the elements
+     * @param offset
+     * @param count
+     * @param predicate the filter to be applied to the elements
+     */
+    public CollectionPageFilterIteratorWithSize(Iterable<T> collection, int offset, int count, Predicate<T> predicate) {
+        super(collection, offset, count, predicate);
     }
     // </editor-fold>
     // <editor-fold defaultstate="expanded" desc="Public methods">
-
-    /**
-     * {@inheritDoc} 
-     */
-    @Override
-    public int getPageSize() {
-        return (nextIndex!=-1)? -1 : (countElements>toIndex ? toIndex : countElements)-fromIndex;
-    }
-    
     /**
      * {@inheritDoc} 
      */
     @Override
     public int size() {
-        return nextIndex!=-1 ? -1 : countElements;
+        return next!=null ? -1 : countElements;
     }
 
     // </editor-fold>
-    // <editor-fold defaultstate="collapsed" desc="Private methods">
+    // <editor-fold defaultstate="collapsed" desc="Protected methods">
     /**
      * Searches for the next element that matches the filtering conditions and
      * returns it.
      * 
-     * @param currIndex
      * @return the next element that matches the filtering conditions or null
      *          if no more elements are available
      */
     @Override
-    protected int getNextIndex(int currIndex){
-        if(nextIndex!=-1){
-            for(int i=currIndex+1; i<array.length; i++){
-                if(predicate.test(array[i])){
-                    countElements++;
-                    if(countElements>fromIndex && countElements<=toIndex){
-                        return i;
-                    }
+    protected T getNext(){
+        T tmp;
+        while(it.hasNext()){
+            if(predicate.test(tmp=it.next())){
+                countElements++;
+                if(countElements>fromIndex && countElements<=toIndex){
+                    return tmp;
                 }
             }
         }
-        return -1;
+        return null;
     }
     // </editor-fold>
 }

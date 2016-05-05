@@ -32,39 +32,38 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.nfpj.utils.arrays.ArrayIteratorTestParams;
-import org.nfpj.utils.collections.CollectionIteratorTestParams;
+import org.nfpj.utils.arrays.ArrayIteratorDescendingTestParams;
+import org.nfpj.utils.collections.ListIteratorDescendingTestParams;
 
 /**
  *
  * @author njacinto
  */
 @RunWith(Parameterized.class)
-public class PageIteratorWithSizeTest {
+public class PageFilterIteratorDescendingWithSizeTest {
     @Parameterized.Parameters(name = "{index}: {1}")
     public static Collection<Object[]> data() {
         List<Object[]> data = new LinkedList<>();
-        for(IteratorTestFactory factory : CollectionIteratorTestParams.data()){
-            if(factory instanceof PageIteratorWithSizeTestFactory){
+        for(IteratorTestFactory factory : ListIteratorDescendingTestParams.data()){
+            if(factory instanceof PageFilterIteratorWithSizeTestFactory){
                 data.add(new Object[]{ factory, factory.getName() });
             }
         }
-        for(IteratorTestFactory factory : ArrayIteratorTestParams.data()){
-            if(factory instanceof PageIteratorWithSizeTestFactory){
+        for(IteratorTestFactory factory : ArrayIteratorDescendingTestParams.data()){
+            if(factory instanceof PageFilterIteratorWithSizeTestFactory){
                 data.add(new Object[]{ factory, factory.getName() });
             }
         }
         return data;
     }
     
-    protected final PageIteratorWithSizeTestFactory factory;
+    protected final PageFilterIteratorWithSizeTestFactory factory;
     protected final String name;
 
-    public PageIteratorWithSizeTest(PageIteratorWithSizeTestFactory factory, String name) {
+    public PageFilterIteratorDescendingWithSizeTest(PageFilterIteratorWithSizeTestFactory factory, String name) {
         this.factory = factory;
         this.name = name;
     }
-    
     
     @Before
     public void setUp() {
@@ -151,4 +150,14 @@ public class PageIteratorWithSizeTest {
         int result = instance.size();
         assertEquals(expResult, result);
     }
+    
+    @Test
+    public void testSizeWithFilter(){
+        final Character[] array = new Character[]{'a', 'b', 'c', 'd', 'e', 'f'};
+        Character[] filterOptions = new Character[]{'a', 'b', 'c'};
+        final Character[] expected = new Character[]{'c'};
+        FilterIteratorTest.testFilterWithSize(factory.getWithSize(2, 4, new FilterIteratorTest.ExpectedFilterPredicate(filterOptions), array), 
+                array, filterOptions.length, expected);
+    }
+    
 }

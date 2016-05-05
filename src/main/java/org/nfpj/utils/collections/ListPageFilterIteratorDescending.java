@@ -24,7 +24,8 @@
 package org.nfpj.utils.collections;
 
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 import org.nfpj.utils.PageIterator;
@@ -35,45 +36,45 @@ import org.nfpj.utils.predicates.TruePredicate;
  * @author njacinto
  * @param <T> the type of object being returned by this iterator
  */
-public class CollectionPagedFilterIterator<T> implements PageIterator<T> {
+public class ListPageFilterIteratorDescending<T> implements PageIterator<T> {
     
-    protected final Iterator<T> it;
+    protected final ListIterator<T> it;
     protected final Predicate<T> predicate;
     protected final int fromIndex;
     protected final int toIndex;
-    protected T next;
+    protected T previous;
     protected int countElements = 0;
 
     // <editor-fold defaultstate="expanded" desc="Constructors">
     /**
      * Creates an instance of this class
      * 
-     * @param it the iterator from where this instance will extract the elements
+     * @param it the list iterator from where this instance will extract the elements
      * @param fromIndex
      * @param toIndex
      * @param predicate the filter to be applied to the elements
      */
-    public CollectionPagedFilterIterator(Iterator<T> it, int fromIndex, int toIndex, Predicate<T> predicate) {
+    public ListPageFilterIteratorDescending(ListIterator<T> it, int fromIndex, int toIndex, Predicate<T> predicate) {
         if(fromIndex>=toIndex){
             throw new IllegalArgumentException("fromIndex cannot be bigger or equal to toIndex");
         }
-        this.it = it!=null ? it : Collections.emptyIterator();
+        this.it = it!=null ? it : Collections.emptyListIterator();
         this.predicate = predicate!=null ? predicate : TruePredicate.getInstance();
         this.fromIndex = fromIndex<0 ? 0 : fromIndex;
         this.toIndex = toIndex;
-        this.next = getNext();
+        this.previous = getPrevious();
     }
 
     /**
      * Creates an instance of this class
      * 
-     * @param collection the collection from where this instance will extract the elements
+     * @param list the list from where this instance will extract the elements
      * @param fromIndex
      * @param toIndex
      * @param predicate the filter to be applied to the elements
      */
-    public CollectionPagedFilterIterator(Iterable<T> collection, int fromIndex, int toIndex, Predicate<T> predicate) {
-        this(collection==null ? null : collection.iterator(), fromIndex, toIndex, predicate);
+    public ListPageFilterIteratorDescending(List<T> list, int fromIndex, int toIndex, Predicate<T> predicate) {
+        this(list==null ? null : list.listIterator(list.size()), fromIndex, toIndex, predicate);
     }
     // </editor-fold>
     // <editor-fold defaultstate="expanded" desc="Public methods">
@@ -106,7 +107,7 @@ public class CollectionPagedFilterIterator<T> implements PageIterator<T> {
      */
     @Override
     public int getPageSize() {
-        return (next!=null)? -1 : countElements-fromIndex;
+        return (previous!=null)? -1 : countElements-fromIndex;
     }
     
     /**
@@ -114,7 +115,7 @@ public class CollectionPagedFilterIterator<T> implements PageIterator<T> {
      */
     @Override
     public boolean hasNext() {
-        return next !=null;
+        return previous !=null;
     }
 
     /**
@@ -122,11 +123,11 @@ public class CollectionPagedFilterIterator<T> implements PageIterator<T> {
      */
     @Override
     public T next() {
-        if(next==null){
+        if(previous==null){
             throw new NoSuchElementException("The underline collection has no elements.");
         }
-        T ret = next;
-        next = getNext();
+        T ret = previous;
+        previous = getPrevious();
         return ret;
     }
 
@@ -138,7 +139,7 @@ public class CollectionPagedFilterIterator<T> implements PageIterator<T> {
         throw new UnsupportedOperationException("The iterator doesn't allow changes.");
     }
     // </editor-fold>
-    // <editor-fold defaultstate="collapsed" desc="Private methods">
+    // <editor-fold defaultstate="collapsed" desc="Protected methods">
     /**
      * Searches for the next element that matches the filtering conditions and
      * returns it.
@@ -146,11 +147,11 @@ public class CollectionPagedFilterIterator<T> implements PageIterator<T> {
      * @return the next element that matches the filtering conditions or null
      *          if no more elements are available
      */
-    protected T getNext(){
+    protected T getPrevious(){
         if(countElements<toIndex){
             T tmp;
-            while(it.hasNext()){
-                if(predicate.test(tmp=it.next())){
+            while(it.hasPrevious()){
+                if(predicate.test(tmp=it.previous())){
                     countElements++;
                     if(countElements>fromIndex){
                         return tmp;

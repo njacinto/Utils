@@ -24,21 +24,44 @@
 package org.nfpj.utils.arrays;
 
 import java.util.function.Predicate;
-import org.nfpj.utils.PageFilterIteratorTest;
-import org.nfpj.utils.PageIterator;
 
 /**
  *
  * @author njacinto
+ * @param <T> the type of object being returned by this iterator
  */
-public class ArrayPagedFilterIteratorTest extends PageFilterIteratorTest {
-    
-    public ArrayPagedFilterIteratorTest() {
-    }
+public class ArrayFilterIteratorDescending<T> extends ArrayFilterIterator<T> {
 
-    @Override
-    protected PageIterator<Character> getIterator(int fromIndex, int toIndex, 
-            Predicate<Character> filter, Character... values) {
-        return new ArrayPagedFilterIterator(values, fromIndex, toIndex, filter);
+    // <editor-fold defaultstate="expanded" desc="Constructors">
+    /**
+     * Creates an instance of this class
+     * 
+     * @param array the array from where this instance will extract the elements
+     * @param predicate the filter to be applied to the elements
+     */
+    public ArrayFilterIteratorDescending(T[] array, Predicate<T> predicate) {
+        super(array, predicate, (array==null ? 0 : array.length));
     }
+    // </editor-fold>
+    // <editor-fold defaultstate="collapsed" desc="Protected methods">
+    /**
+     * Searches for the next element that matches the filtering conditions and
+     * returns it.
+     * 
+     * @param currIndex
+     * @return the next element that matches the filtering conditions or null
+     *          if no more elements are available
+     */
+    @Override
+    protected int getNextIndex(int currIndex){
+        if(currIndex!=END_OF_ITERATION){
+            for(int i=currIndex-1; i>-1; i--){
+                if(predicate.test(array[i])){
+                    return i;
+                }
+            }
+        }
+        return END_OF_ITERATION;
+    }
+    // </editor-fold>
 }

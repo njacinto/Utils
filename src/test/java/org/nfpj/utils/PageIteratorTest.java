@@ -24,42 +24,60 @@
 package org.nfpj.utils;
 
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.nfpj.utils.arrays.ArrayIteratorTestParams;
+import org.nfpj.utils.collections.CollectionIteratorTestParams;
 
 /**
  *
  * @author njacinto
  */
-public abstract class PageIteratorTest extends IteratorTest {
+@RunWith(Parameterized.class)
+public class PageIteratorTest {
+    @Parameterized.Parameters(name = "{index}: {1}")
+    public static Collection<Object[]> data() {
+        List<Object[]> data = new LinkedList<>();
+        for(IteratorTestFactory factory : CollectionIteratorTestParams.data()){
+            if(factory instanceof PageIteratorTestFactory){
+                data.add(new Object[]{ factory, factory.getName() });
+            }
+        }
+        for(IteratorTestFactory factory : ArrayIteratorTestParams.data()){
+            if(factory instanceof PageIteratorTestFactory){
+                data.add(new Object[]{ factory, factory.getName() });
+            }
+        }
+        return data;
+    }
     
-    protected abstract PageIterator<Character> getIterator(int fromIndex, int toIndex, 
-            Character ... values);
-    
-    public PageIteratorTest() {
+    protected final PageIteratorTestFactory factory;
+    protected final String name;
+
+    public PageIteratorTest(PageIteratorTestFactory factory, String name) {
+        this.factory = factory;
+        this.name = name;
     }
     
     @Before
-    @Override
     public void setUp() {
-        super.setUp();
     }
     
     @After
-    @Override
     public void tearDown() {
-        super.tearDown();
     }
     
     
     @Test
     public void testCreateInvalidFrom() {
-        PageIterator instance = getIterator(-1, 2, 'a', 'b');
+        PageIterator instance = factory.get(-1, 2, 'a', 'b');
         int expResult = 0;
         int result = instance.getFromIndex();
         assertEquals(expResult, result);
@@ -67,12 +85,12 @@ public abstract class PageIteratorTest extends IteratorTest {
     
     @Test(expected = IllegalArgumentException.class)
     public void testCreateInvalidTo_EqualToFrom() {
-        PageIterator instance = getIterator(1, 1, 'a', 'b');
+        PageIterator instance = factory.get(1, 1, 'a', 'b');
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void testCreateInvalidTo_SmallerThanFrom() {
-        PageIterator instance = getIterator(1, 0, 'a', 'b');
+        PageIterator instance = factory.get(1, 0, 'a', 'b');
     }
 
     /**
@@ -80,7 +98,7 @@ public abstract class PageIteratorTest extends IteratorTest {
      */
     @Test
     public void testGetFromIndex() {
-        PageIterator instance = getIterator(1, 2, 'a', 'b');
+        PageIterator instance = factory.get(1, 2, 'a', 'b');
         int expResult = 1;
         int result = instance.getFromIndex();
         assertEquals(expResult, result);
@@ -88,7 +106,7 @@ public abstract class PageIteratorTest extends IteratorTest {
     
     @Test
     public void testGetFromIndex_NegativeSet() {
-        PageIterator instance = getIterator(-1, 2, 'a', 'b');
+        PageIterator instance = factory.get(-1, 2, 'a', 'b');
         int expResult = 0;
         int result = instance.getFromIndex();
         assertEquals(expResult, result);
@@ -99,7 +117,7 @@ public abstract class PageIteratorTest extends IteratorTest {
      */
     @Test
     public void testGetToIndex() {
-        PageIterator instance = getIterator(1, 2, 'a', 'b');
+        PageIterator instance = factory.get(1, 2, 'a', 'b');
         int expResult = 2;
         int result = instance.getToIndex();
         assertEquals(expResult, result);
@@ -110,11 +128,11 @@ public abstract class PageIteratorTest extends IteratorTest {
      */
     @Test
     public void testGetPage() {
-        PageIterator instance = getIterator(2, 3, 'a', 'b', 'c', 'd');
+        PageIterator instance = factory.get(2, 3, 'a', 'b', 'c', 'd');
         int expResult = 3;
         int result = instance.getPage();
         assertEquals(expResult, result);
-        instance = getIterator(2, 4, 'a', 'b', 'c', 'd');
+        instance = factory.get(2, 4, 'a', 'b', 'c', 'd');
         expResult = 2;
         result = instance.getPage();
         assertEquals(expResult, result);
@@ -125,7 +143,7 @@ public abstract class PageIteratorTest extends IteratorTest {
      */
     @Test
     public void testGetPageSize_BeforeGettingPageElements() {
-        PageIterator instance = getIterator(2, 4, 'a', 'b', 'c', 'd');
+        PageIterator instance = factory.get(2, 4, 'a', 'b', 'c', 'd');
         int expResult = -1;
         int result = instance.getPageSize();
         assertEquals(expResult, result);
@@ -133,14 +151,14 @@ public abstract class PageIteratorTest extends IteratorTest {
     
     @Test
     public void testGetPageSize_AfterGettingPageElements() {
-        PageIterator instance = getIterator(2, 4, 'a', 'b', 'c', 'd');
+        PageIterator instance = factory.get(2, 4, 'a', 'b', 'c', 'd');
         int expResult = 2;
         while(instance.hasNext()){
             instance.next();
         }
         int result = instance.getPageSize();
         assertEquals(expResult, result);
-        instance = getIterator(3, 6, 'a', 'b', 'c', 'd');
+        instance = factory.get(3, 6, 'a', 'b', 'c', 'd');
         expResult = 1;
         while(instance.hasNext()){
             instance.next();
@@ -159,7 +177,7 @@ public abstract class PageIteratorTest extends IteratorTest {
             {3,6,1}
         };
         for(int[] toFromIndex : toFromTotalIndexArray){
-            PageIterator instance = getIterator(toFromIndex[0], toFromIndex[1], data);
+            PageIterator instance = factory.get(toFromIndex[0], toFromIndex[1], data);
             Character[] expResult = Arrays.copyOfRange(data, toFromIndex[0], toFromIndex[1]);
             int i = 0;
             while(instance.hasNext()){
@@ -169,12 +187,5 @@ public abstract class PageIteratorTest extends IteratorTest {
             assertEquals("Unexpected number of elements when from="+toFromIndex[0]+" and to="+toFromIndex[1], 
                     toFromIndex[2], i);
         }
-    }
-    
-    // Protected
-
-    @Override
-    protected Iterator<Character> getIterator(Character ... values) {
-        return getIterator(0, (values==null || values.length==0 ? 1 : values.length), values);
     }
 }

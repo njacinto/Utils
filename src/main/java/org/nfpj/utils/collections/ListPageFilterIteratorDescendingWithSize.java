@@ -32,7 +32,7 @@ import org.nfpj.utils.IteratorWithSize;
  * @author njacinto
  * @param <T> the type of object being returned by this iterator
  */
-public class CollectionPagedFilterIteratorWithSize<T> extends CollectionPagedFilterIterator<T> implements IteratorWithSize<T> {
+public class ListPageFilterIteratorDescendingWithSize<T> extends CollectionPageFilterIterator<T> implements IteratorWithSize<T> {
     
     // <editor-fold defaultstate="expanded" desc="Constructors">
     /**
@@ -43,7 +43,7 @@ public class CollectionPagedFilterIteratorWithSize<T> extends CollectionPagedFil
      * @param count
      * @param predicate the filter to be applied to the elements
      */
-    public CollectionPagedFilterIteratorWithSize(Iterator<T> it, int offset, int count, Predicate<T> predicate) {
+    public ListPageFilterIteratorDescendingWithSize(Iterator<T> it, int offset, int count, Predicate<T> predicate) {
         super(it, offset, count, predicate);
     }
 
@@ -55,7 +55,7 @@ public class CollectionPagedFilterIteratorWithSize<T> extends CollectionPagedFil
      * @param count
      * @param predicate the filter to be applied to the elements
      */
-    public CollectionPagedFilterIteratorWithSize(Iterable<T> collection, int offset, int count, Predicate<T> predicate) {
+    public ListPageFilterIteratorDescendingWithSize(Iterable<T> collection, int offset, int count, Predicate<T> predicate) {
         super(collection, offset, count, predicate);
     }
     // </editor-fold>
@@ -69,7 +69,7 @@ public class CollectionPagedFilterIteratorWithSize<T> extends CollectionPagedFil
     }
 
     // </editor-fold>
-    // <editor-fold defaultstate="collapsed" desc="Private methods">
+    // <editor-fold defaultstate="collapsed" desc="Protected methods">
     /**
      * Searches for the next element that matches the filtering conditions and
      * returns it.

@@ -21,9 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.nfpj.utils.arrays;
+package org.nfpj.utils.collections;
 
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 import org.nfpj.utils.predicates.TruePredicate;
@@ -33,35 +36,33 @@ import org.nfpj.utils.predicates.TruePredicate;
  * @author njacinto
  * @param <T> the type of object being returned by this iterator
  */
-public class ArrayFilterIterator<T> implements Iterator<T> {
-    protected static final int END_OF_ITERATION = -2;
-    //
-    private int nextIndex;
-    //
-    protected final T[] array;
-    protected final Predicate<T> predicate;
+public class ListFilterIteratorDescending<T> implements Iterator<T> {
+    
+    private final ListIterator<T> it;
+    private final Predicate<T> predicate;
+    private T previous;
 
     // <editor-fold defaultstate="expanded" desc="Constructors">
     /**
      * Creates an instance of this class
      * 
-     * @param array the array from where this instance will extract the elements
+     * @param it the iterator from where this instance will extract the elements
      * @param predicate the filter to be applied to the elements
      */
-    public ArrayFilterIterator(T[] array, Predicate<T> predicate) {
-        this(array, predicate, -1);
-    }
-    
-    /**
-     * 
-     * @param array
-     * @param predicate 
-     * @param prevIndex 
-     */
-    protected ArrayFilterIterator(T[] array, Predicate<T> predicate, int prevIndex) {
-        this.array = array!=null ? array : ArrayUtil.empty();
+    public ListFilterIteratorDescending(ListIterator<T> it, Predicate<T> predicate) {
+        this.it = it!=null ? it : Collections.emptyListIterator();
         this.predicate = predicate!=null ? predicate : TruePredicate.getInstance();
-        this.nextIndex = getNextIndex(prevIndex);
+        this.previous = getPrevious();
+    }
+
+    /**
+     * Creates an instance of this class
+     * 
+     * @param list the collection from where this instance will extract the elements
+     * @param predicate the filter to be applied to the elements
+     */
+    public ListFilterIteratorDescending(List<T> list, Predicate<T> predicate) {
+        this(list!=null ? list.listIterator(list.size()) : null, predicate);
     }
     // </editor-fold>
     // <editor-fold defaultstate="expanded" desc="Public methods">
@@ -71,7 +72,7 @@ public class ArrayFilterIterator<T> implements Iterator<T> {
      */
     @Override
     public boolean hasNext() {
-        return nextIndex != END_OF_ITERATION;
+        return previous !=null;
     }
 
     /**
@@ -79,12 +80,12 @@ public class ArrayFilterIterator<T> implements Iterator<T> {
      */
     @Override
     public T next() {
-        if(nextIndex==END_OF_ITERATION){
+        if(previous==null){
             throw new NoSuchElementException("The underline collection has no elements.");
         }
-        int index = nextIndex;
-        nextIndex = getNextIndex(nextIndex);
-        return array[index];
+        T ret = previous;
+        previous = getPrevious();
+        return ret;
     }
 
     /**
@@ -100,19 +101,17 @@ public class ArrayFilterIterator<T> implements Iterator<T> {
      * Searches for the next element that matches the filtering conditions and
      * returns it.
      * 
-     * @param currIndex
      * @return the next element that matches the filtering conditions or null
      *          if no more elements are available
      */
-    protected int getNextIndex(int currIndex){
-        if(currIndex!=END_OF_ITERATION){
-            for(int i=currIndex+1; i<array.length; i++){
-                if(predicate.test(array[i])){
-                    return i;
-                }
+    protected T getPrevious(){
+        T tmp;
+        while(it.hasPrevious()){
+            if(predicate.test(tmp=it.previous())){
+                return tmp;
             }
         }
-        return END_OF_ITERATION;
+        return null;
     }
     // </editor-fold>
 }

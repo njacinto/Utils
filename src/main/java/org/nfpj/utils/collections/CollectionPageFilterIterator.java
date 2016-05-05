@@ -21,11 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.nfpj.utils.arrays;
+package org.nfpj.utils.collections;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
+import org.nfpj.utils.PageIterator;
 import org.nfpj.utils.predicates.TruePredicate;
 
 /**
@@ -33,45 +35,86 @@ import org.nfpj.utils.predicates.TruePredicate;
  * @author njacinto
  * @param <T> the type of object being returned by this iterator
  */
-public class ArrayFilterIterator<T> implements Iterator<T> {
-    protected static final int END_OF_ITERATION = -2;
-    //
-    private int nextIndex;
-    //
-    protected final T[] array;
+public class CollectionPageFilterIterator<T> implements PageIterator<T> {
+    
+    protected final Iterator<T> it;
     protected final Predicate<T> predicate;
+    protected final int fromIndex;
+    protected final int toIndex;
+    protected T next;
+    protected int countElements = 0;
 
     // <editor-fold defaultstate="expanded" desc="Constructors">
     /**
      * Creates an instance of this class
      * 
-     * @param array the array from where this instance will extract the elements
+     * @param it the iterator from where this instance will extract the elements
+     * @param fromIndex
+     * @param toIndex
      * @param predicate the filter to be applied to the elements
      */
-    public ArrayFilterIterator(T[] array, Predicate<T> predicate) {
-        this(array, predicate, -1);
-    }
-    
-    /**
-     * 
-     * @param array
-     * @param predicate 
-     * @param prevIndex 
-     */
-    protected ArrayFilterIterator(T[] array, Predicate<T> predicate, int prevIndex) {
-        this.array = array!=null ? array : ArrayUtil.empty();
+    public CollectionPageFilterIterator(Iterator<T> it, int fromIndex, int toIndex, Predicate<T> predicate) {
+        if(fromIndex>=toIndex){
+            throw new IllegalArgumentException("fromIndex cannot be bigger or equal to toIndex");
+        }
+        this.it = it!=null ? it : Collections.emptyIterator();
         this.predicate = predicate!=null ? predicate : TruePredicate.getInstance();
-        this.nextIndex = getNextIndex(prevIndex);
+        this.fromIndex = fromIndex<0 ? 0 : fromIndex;
+        this.toIndex = toIndex;
+        this.next = getNext();
+    }
+
+    /**
+     * Creates an instance of this class
+     * 
+     * @param collection the collection from where this instance will extract the elements
+     * @param fromIndex
+     * @param toIndex
+     * @param predicate the filter to be applied to the elements
+     */
+    public CollectionPageFilterIterator(Iterable<T> collection, int fromIndex, int toIndex, Predicate<T> predicate) {
+        this(collection==null ? null : collection.iterator(), fromIndex, toIndex, predicate);
     }
     // </editor-fold>
     // <editor-fold defaultstate="expanded" desc="Public methods">
+    /**
+     * {@inheritDoc} 
+     */
+    @Override
+    public int getFromIndex() {
+        return fromIndex;
+    }
+
+    /**
+     * {@inheritDoc} 
+     */
+    @Override
+    public int getToIndex() {
+        return toIndex;
+    }
+
+    /**
+     * {@inheritDoc} 
+     */
+    @Override
+    public int getPage() {
+        return (fromIndex/(toIndex-fromIndex))+1;
+    }
+
+    /**
+     * {@inheritDoc} 
+     */
+    @Override
+    public int getPageSize() {
+        return (next!=null)? -1 : countElements-fromIndex;
+    }
     
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean hasNext() {
-        return nextIndex != END_OF_ITERATION;
+        return next !=null;
     }
 
     /**
@@ -79,12 +122,12 @@ public class ArrayFilterIterator<T> implements Iterator<T> {
      */
     @Override
     public T next() {
-        if(nextIndex==END_OF_ITERATION){
+        if(next==null){
             throw new NoSuchElementException("The underline collection has no elements.");
         }
-        int index = nextIndex;
-        nextIndex = getNextIndex(nextIndex);
-        return array[index];
+        T ret = next;
+        next = getNext();
+        return ret;
     }
 
     /**
@@ -100,19 +143,22 @@ public class ArrayFilterIterator<T> implements Iterator<T> {
      * Searches for the next element that matches the filtering conditions and
      * returns it.
      * 
-     * @param currIndex
      * @return the next element that matches the filtering conditions or null
      *          if no more elements are available
      */
-    protected int getNextIndex(int currIndex){
-        if(currIndex!=END_OF_ITERATION){
-            for(int i=currIndex+1; i<array.length; i++){
-                if(predicate.test(array[i])){
-                    return i;
+    protected T getNext(){
+        if(countElements<toIndex){
+            T tmp;
+            while(it.hasNext()){
+                if(predicate.test(tmp=it.next())){
+                    countElements++;
+                    if(countElements>fromIndex){
+                        return tmp;
+                    }
                 }
             }
         }
-        return END_OF_ITERATION;
+        return null;
     }
     // </editor-fold>
 }

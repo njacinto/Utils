@@ -27,115 +27,72 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-import org.nfpj.utils.arrays.ArrayIteratorTestParams;
-import org.nfpj.utils.collections.CollectionIteratorTestParams;
+import org.nfpj.utils.arrays.ArrayIteratorDescendingTestParams;
+import org.nfpj.utils.collections.ListIteratorDescendingTestParams;
 
 /**
  *
  * @author njacinto
  */
 @RunWith(Parameterized.class)
-public class IteratorTest {
-    @Parameters(name = "{index}: {1}")
+public class IteratorDescendingTest extends IteratorTest {
+    @Parameterized.Parameters(name = "{index}: {1}")
     public static Collection<Object[]> data() {
         List<Object[]> data = new LinkedList<>();
-        for(IteratorTestFactory factory : CollectionIteratorTestParams.data()){
+        for(IteratorTestFactory factory : ListIteratorDescendingTestParams.data()){
             data.add(new Object[]{ factory, factory.getName() });
         }
-        for(IteratorTestFactory factory : ArrayIteratorTestParams.data()){
+        for(IteratorTestFactory factory : ArrayIteratorDescendingTestParams.data()){
             data.add(new Object[]{ factory, factory.getName() });
         }
         return data;
     }
     
-    protected final IteratorTestFactory factory;
-    protected final String name;
-    
-    public IteratorTest(IteratorTestFactory factory, String name) {
-        this.factory = factory;
-        this.name = name;
-    }
-    
     @Before
+    @Override
     public void setUp() {
+        super.setUp();
     }
     
     @After
+    @Override
     public void tearDown() {
-    }
-
-    @Test
-    public void testCreationWithNullParameters() {
-        Iterator<Character> instance = factory.get((Character[])null);
-        boolean expResult = false;
-        boolean result = instance.hasNext();
-        assertEquals(expResult, result);
+        super.tearDown();
     }
     
-    /**
-     * Test of hasNext method, of class FilterIterator.
-     */
-    @Test
-    public void testHasNext_true() {
-        Iterator<Character> instance = factory.get('a', 'b');
-        boolean expResult = true;
-        boolean result = instance.hasNext();
-        assertEquals(expResult, result);
-    }
-    
-    @Test
-    public void testHasNext_false() {
-        Iterator<Character> instance = factory.get(new Character[0]);
-        boolean expResult = false;
-        boolean result = instance.hasNext();
-        assertEquals(expResult, result);
+    public IteratorDescendingTest(IteratorTestFactory factory, String name) {
+        super(factory, name);
     }
 
     /**
      * Test of next method, of class FilterIterator.
      */
     @Test
+    @Override
     public void testNext() {
         Iterator<Character> instance = factory.get('a', 'b');
-        Object expResult = 'a';
+        Object expResult = 'b';
         Object result = instance.next();
         assertEquals(expResult, result);
     }
     
-    @Test(expected = NoSuchElementException.class)
-    public void testNext_empty() {
-        Iterator<Character> instance = factory.get(new Character[0]);
-        instance.next();
-    }
-
-    /**
-     * Test of remove method, of class FilterIterator.
-     */
-    @Test(expected = UnsupportedOperationException.class)
-    public void testRemove() {
-        Iterator<Character> instance = factory.get('a', 'b');
-        instance.next();
-        instance.remove();
-    }
-    
     @Test
+    @Override
     public void testIteractions(){
         Character[] array = new Character[]{'a', 'b', 'c', 'd'};
         Iterator<Character> instance = factory.get(array);
-        int i=0;
+        int i=array.length-1;
         while(instance.hasNext()){
             assertEquals("Value on iterator don't match value on collection",
-                    array[i++], instance.next());
+                    array[i--], instance.next());
         }
         assertEquals("Number of elements iterated don't match the number of elements in collection", 
-                array.length, i);
+                -1, i);
     }
 }

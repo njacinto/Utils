@@ -27,80 +27,78 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.nfpj.utils.arrays.ArrayIteratorTestParams;
-import org.nfpj.utils.collections.CollectionIteratorTestParams;
+import org.nfpj.utils.arrays.ArrayIteratorDescendingTestParams;
+import org.nfpj.utils.collections.ListIteratorDescendingTestParams;
 
 /**
  *
  * @author njacinto
  */
 @RunWith(Parameterized.class)
-public class IteratorWithSizeTest {
+public class FilterIteratorDescendingTest extends FilterIteratorTest {
     @Parameterized.Parameters(name = "{index}: {1}")
     public static Collection<Object[]> data() {
         List<Object[]> data = new LinkedList<>();
-        for(IteratorTestFactory factory : CollectionIteratorTestParams.data()){
-            if(factory instanceof IteratorWithSizeTestFactory){
+        for(IteratorTestFactory factory : ListIteratorDescendingTestParams.data()){
+            if(factory instanceof FilterIteratorTestFactory){
                 data.add(new Object[]{ factory, factory.getName() });
             }
         }
-        for(IteratorTestFactory factory : ArrayIteratorTestParams.data()){
-            if(factory instanceof IteratorWithSizeTestFactory){
+        for(IteratorTestFactory factory : ArrayIteratorDescendingTestParams.data()){
+            if(factory instanceof FilterIteratorTestFactory){
                 data.add(new Object[]{ factory, factory.getName() });
             }
         }
         return data;
     }
-    
-    protected final IteratorWithSizeTestFactory factory;
-    protected final String name;
 
-    public IteratorWithSizeTest(IteratorWithSizeTestFactory factory, String name) {
-        this.factory = factory;
-        this.name = name;
+    public FilterIteratorDescendingTest(FilterIteratorTestFactory factory, String name) {
+        super(factory, name);
     }
     
     @Before
+    @Override
     public void setUp() {
+        super.setUp();
     }
     
     @After
+    @Override
     public void tearDown() {
-    }
-
-    /**
-     * Test of size method, of class IteratorWithCollectionSize.
-     */
-    @Test
-    public void testSize() {
-        IteratorWithSize instance = factory.getWithSize((Character[])null);
-        int expResult = 0;
-        int result = instance.size();
-        assertEquals(expResult, result);
+        super.tearDown();
     }
     
     @Test
-    public void testSizeAfterReachingEnd() {
-        IteratorWithSize instance = factory.getWithSize('a','b');
-        int expResult = 2;
-        while(instance.hasNext()){
-            instance.next();
-        }
-        int result = instance.size();
-        assertEquals(expResult, result);
+    @Override
+    public void testFilter(){
+        final Character[] array = new Character[]{'a', 'b', 'c', 'd'};
+        final Character[] expected = new Character[]{'c', 'b'};
+        FilterIteratorTest.testFilter(
+                factory.get(new FilterIteratorTest.ExpectedFilterPredicate(expected), array), 
+                array, expected);
     }
     
     @Test
-    public void testSizeBeforeReachingEnd() {
-        IteratorWithSize instance = factory.getWithSize('a','b');
-        int expResult = -1;
-        int result = instance.size();
-        assertEquals(expResult, result);
+    @Override
+    public void testFilter_beginning(){
+        final Character[] array = new Character[]{'a', 'b', 'c', 'd'};
+        final Character[] expected = new Character[]{'b', 'a'};
+        FilterIteratorTest.testFilter(
+                factory.get(new FilterIteratorTest.ExpectedFilterPredicate(expected), array), 
+                array, expected);
     }
     
+    @Test
+    @Override
+    public void testFilter_End(){
+        final Character[] array = new Character[]{'a', 'b', 'c', 'd'};
+        final Character[] expected = new Character[]{'d', 'c'};
+        FilterIteratorTest.testFilter(
+                factory.get(new FilterIteratorTest.ExpectedFilterPredicate(expected), array), 
+                array, expected);
+    }
 }
