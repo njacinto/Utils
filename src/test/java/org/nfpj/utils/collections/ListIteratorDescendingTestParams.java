@@ -7,10 +7,13 @@ package org.nfpj.utils.collections;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.function.Predicate;
+import org.nfpj.utils.FilterIteratorTestFactory;
 import org.nfpj.utils.IteratorTestFactory;
+import org.nfpj.utils.IteratorWithSize;
+import org.nfpj.utils.PageFilterIteratorTestFactory;
+import org.nfpj.utils.PageFilterIteratorWithSizeTestFactory;
 import org.nfpj.utils.PageIterator;
-import org.nfpj.utils.predicates.TruePredicate;
-import org.nfpj.utils.PageIteratorTestFactory;
 
 /**
  *
@@ -20,29 +23,52 @@ public class ListIteratorDescendingTestParams {
     
     public static IteratorTestFactory[] data() {
         IteratorTestFactory[] data = new IteratorTestFactory[]{
-                new IteratorTestFactory() {
+                new FilterIteratorTestFactory() {
                     @Override
                     public String getName() {
                         return ListFilterIteratorDescending.class.getSimpleName();
                     }
 
                     @Override
-                    public Iterator<Character> get(Character... c) {
+                    public Iterator<Character> get(Predicate<Character> filter, Character... c) {
                         return new ListFilterIteratorDescending<Character>(
-                                (c==null ? null : Arrays.asList(c)), TruePredicate.INSTANCE);
+                                (c==null ? null : Arrays.asList(c)), filter);
                     }
                 },
-                new PageIteratorTestFactory() {
+                new PageFilterIteratorTestFactory() {
                     @Override
                     public String getName() {
                         return ListPageFilterIteratorDescending.class.getSimpleName();
                     }
                     
                     @Override
-                    public PageIterator<Character> get(int fromIndex, int toIndex, Character... c) {
+                    public PageIterator<Character> get(int fromIndex, int toIndex, 
+                            Predicate<Character> filter, Character... c) {
                         return new ListPageFilterIteratorDescending<Character>(
                                 (c==null ? null : Arrays.asList(c)), 
-                                fromIndex, toIndex, TruePredicate.INSTANCE);
+                                fromIndex, toIndex, filter);
+                    }
+                },
+                new PageFilterIteratorWithSizeTestFactory() {
+                    @Override
+                    public String getName() {
+                        return ListPageFilterIteratorDescendingWithSize.class.getSimpleName();
+                    }
+                    
+                    @Override
+                    public PageIterator<Character> get(int fromIndex, int toIndex, 
+                            Predicate<Character> filter, Character... c) {
+                        return new ListPageFilterIteratorDescendingWithSize<Character>(
+                                (c==null ? null : Arrays.asList(c)), 
+                                fromIndex, toIndex, filter);
+                    }
+
+                    @Override
+                    public IteratorWithSize<Character> getWithSize(int fromIndex, int toIndex, 
+                            Predicate<Character> filter, Character... c) {
+                        return  new ListPageFilterIteratorDescendingWithSize<Character>(
+                                (c==null ? null : Arrays.asList(c)), 
+                                fromIndex, toIndex, filter);
                     }
                 }
         };

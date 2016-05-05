@@ -24,6 +24,8 @@
 package org.nfpj.utils.collections;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.function.Predicate;
 import org.nfpj.utils.IteratorWithSize;
 
@@ -32,7 +34,7 @@ import org.nfpj.utils.IteratorWithSize;
  * @author njacinto
  * @param <T> the type of object being returned by this iterator
  */
-public class ListPageFilterIteratorDescendingWithSize<T> extends CollectionPageFilterIterator<T> implements IteratorWithSize<T> {
+public class ListPageFilterIteratorDescendingWithSize<T> extends ListPageFilterIteratorDescending<T> implements IteratorWithSize<T> {
     
     // <editor-fold defaultstate="expanded" desc="Constructors">
     /**
@@ -43,20 +45,20 @@ public class ListPageFilterIteratorDescendingWithSize<T> extends CollectionPageF
      * @param count
      * @param predicate the filter to be applied to the elements
      */
-    public ListPageFilterIteratorDescendingWithSize(Iterator<T> it, int offset, int count, Predicate<T> predicate) {
+    public ListPageFilterIteratorDescendingWithSize(ListIterator<T> it, int offset, int count, Predicate<T> predicate) {
         super(it, offset, count, predicate);
     }
 
     /**
      * Creates an instance of this class
      * 
-     * @param collection the collection from where this instance will extract the elements
+     * @param list the collection from where this instance will extract the elements
      * @param offset
      * @param count
      * @param predicate the filter to be applied to the elements
      */
-    public ListPageFilterIteratorDescendingWithSize(Iterable<T> collection, int offset, int count, Predicate<T> predicate) {
-        super(collection, offset, count, predicate);
+    public ListPageFilterIteratorDescendingWithSize(List<T> list, int offset, int count, Predicate<T> predicate) {
+        super(list, offset, count, predicate);
     }
     // </editor-fold>
     // <editor-fold defaultstate="expanded" desc="Public methods">
@@ -65,7 +67,7 @@ public class ListPageFilterIteratorDescendingWithSize<T> extends CollectionPageF
      */
     @Override
     public int size() {
-        return next!=null ? -1 : countElements;
+        return previous!=null ? -1 : countElements;
     }
 
     // </editor-fold>
@@ -78,10 +80,10 @@ public class ListPageFilterIteratorDescendingWithSize<T> extends CollectionPageF
      *          if no more elements are available
      */
     @Override
-    protected T getNext(){
+    protected T getPrevious(){
         T tmp;
-        while(it.hasNext()){
-            if(predicate.test(tmp=it.next())){
+        while(it.hasPrevious()){
+            if(predicate.test(tmp=it.previous())){
                 countElements++;
                 if(countElements>fromIndex && countElements<=toIndex){
                     return tmp;

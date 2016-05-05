@@ -156,7 +156,7 @@ public class PageFilterIteratorDescendingWithSizeTest {
         final Character[] array = new Character[]{'a', 'b', 'c', 'd', 'e', 'f'};
         Character[] filterOptions = new Character[]{'a', 'b', 'c'};
         final Character[] expected = new Character[]{'c'};
-        FilterIteratorTest.testFilterWithSize(factory.getWithSize(2, 4, new FilterIteratorTest.ExpectedFilterPredicate(filterOptions), array), 
+        FilterIteratorTest.testFilterWithSize(factory.getWithSize(0, 1, new FilterIteratorTest.ExpectedFilterPredicate(filterOptions), array), 
                 array, filterOptions.length, expected);
     }
     
