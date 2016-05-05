@@ -37,6 +37,7 @@ import org.nfpj.utils.predicates.TruePredicate;
  */
 public class CollectionPageFilterIterator<T> implements PageIterator<T> {
     
+    protected static final Object END = new Object();
     protected final Iterator<T> it;
     protected final Predicate<T> predicate;
     protected final int fromIndex;
@@ -106,7 +107,7 @@ public class CollectionPageFilterIterator<T> implements PageIterator<T> {
      */
     @Override
     public int getPageSize() {
-        return (next!=null)? -1 : countElements-fromIndex;
+        return (next!=END)? -1 : countElements-fromIndex;
     }
     
     /**
@@ -114,7 +115,7 @@ public class CollectionPageFilterIterator<T> implements PageIterator<T> {
      */
     @Override
     public boolean hasNext() {
-        return next !=null;
+        return next !=END;
     }
 
     /**
@@ -122,7 +123,7 @@ public class CollectionPageFilterIterator<T> implements PageIterator<T> {
      */
     @Override
     public T next() {
-        if(next==null){
+        if(next==END){
             throw new NoSuchElementException("The underline collection has no elements.");
         }
         T ret = next;
@@ -158,7 +159,7 @@ public class CollectionPageFilterIterator<T> implements PageIterator<T> {
                 }
             }
         }
-        return null;
+        return (T)END;
     }
     // </editor-fold>
 }

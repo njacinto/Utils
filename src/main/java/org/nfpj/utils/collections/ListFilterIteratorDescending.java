@@ -38,9 +38,10 @@ import org.nfpj.utils.predicates.TruePredicate;
  */
 public class ListFilterIteratorDescending<T> implements Iterator<T> {
     
-    private final ListIterator<T> it;
-    private final Predicate<T> predicate;
-    private T previous;
+    protected static final Object END = new Object();
+    protected final ListIterator<T> it;
+    protected final Predicate<T> predicate;
+    protected T previous;
 
     // <editor-fold defaultstate="expanded" desc="Constructors">
     /**
@@ -72,7 +73,7 @@ public class ListFilterIteratorDescending<T> implements Iterator<T> {
      */
     @Override
     public boolean hasNext() {
-        return previous !=null;
+        return previous !=END;
     }
 
     /**
@@ -80,7 +81,7 @@ public class ListFilterIteratorDescending<T> implements Iterator<T> {
      */
     @Override
     public T next() {
-        if(previous==null){
+        if(previous==END){
             throw new NoSuchElementException("The underline collection has no elements.");
         }
         T ret = previous;
@@ -111,7 +112,7 @@ public class ListFilterIteratorDescending<T> implements Iterator<T> {
                 return tmp;
             }
         }
-        return null;
+        return (T)END;
     }
     // </editor-fold>
 }

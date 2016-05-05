@@ -65,7 +65,7 @@ public class CollectionPageFilterIteratorWithSize<T> extends CollectionPageFilte
      */
     @Override
     public int size() {
-        return next!=null ? -1 : countElements;
+        return next!=END ? -1 : countElements;
     }
 
     // </editor-fold>
@@ -88,7 +88,7 @@ public class CollectionPageFilterIteratorWithSize<T> extends CollectionPageFilte
                 }
             }
         }
-        return null;
+        return (T)END;
     }
     // </editor-fold>
 }

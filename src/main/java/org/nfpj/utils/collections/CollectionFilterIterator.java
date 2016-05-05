@@ -35,10 +35,10 @@ import org.nfpj.utils.predicates.TruePredicate;
  * @param <T> the type of object being returned by this iterator
  */
 public class CollectionFilterIterator<T> implements Iterator<T> {
-    
-    private final Iterator<T> it;
-    private final Predicate<T> predicate;
-    private T next;
+    protected static final Object END = new Object();
+    protected final Iterator<T> it;
+    protected final Predicate<T> predicate;
+    protected T next;
 
     // <editor-fold defaultstate="expanded" desc="Constructors">
     /**
@@ -70,7 +70,7 @@ public class CollectionFilterIterator<T> implements Iterator<T> {
      */
     @Override
     public boolean hasNext() {
-        return next !=null;
+        return next != END;
     }
 
     /**
@@ -78,7 +78,7 @@ public class CollectionFilterIterator<T> implements Iterator<T> {
      */
     @Override
     public T next() {
-        if(next==null){
+        if(next==END){
             throw new NoSuchElementException("The underline collection has no elements.");
         }
         T ret = next;
@@ -109,7 +109,7 @@ public class CollectionFilterIterator<T> implements Iterator<T> {
                 return tmp;
             }
         }
-        return null;
+        return (T)END;
     }
     // </editor-fold>
 }

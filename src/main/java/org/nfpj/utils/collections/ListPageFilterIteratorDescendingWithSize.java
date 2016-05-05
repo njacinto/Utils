@@ -23,7 +23,6 @@
  */
 package org.nfpj.utils.collections;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.function.Predicate;
@@ -67,7 +66,7 @@ public class ListPageFilterIteratorDescendingWithSize<T> extends ListPageFilterI
      */
     @Override
     public int size() {
-        return previous!=null ? -1 : countElements;
+        return previous!=END ? -1 : countElements;
     }
 
     // </editor-fold>
@@ -90,7 +89,7 @@ public class ListPageFilterIteratorDescendingWithSize<T> extends ListPageFilterI
                 }
             }
         }
-        return null;
+        return (T)END;
     }
     // </editor-fold>
 }
