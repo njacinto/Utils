@@ -23,14 +23,14 @@
  */
 package org.nfpj.utils.arrays;
 
-import org.nfpj.utils.IteratorWithSize;
+import org.nfpj.utils.PageIteratorWithSize;
 
 /**
  *
  * @author njacinto
  * @param <T> the type of object being returned by this iterator
  */
-public class ArrayPageIteratorWithSize<T> extends ArrayPageIterator<T> implements IteratorWithSize<T> {
+public class ArrayPageIteratorWithSize<T> extends ArrayPageIterator<T> implements PageIteratorWithSize<T> {
     
     // <editor-fold defaultstate="expanded" desc="Constructors">
     /**
