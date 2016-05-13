@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 import org.nfpj.utils.FilterIteratorTestFactory;
 import org.nfpj.utils.IteratorTestFactory;
 import org.nfpj.utils.IteratorWithSize;
+import org.nfpj.utils.IteratorWithSizeTestFactory;
 import org.nfpj.utils.PageFilterIteratorTestFactory;
 import org.nfpj.utils.PageFilterIteratorWithSizeTestFactory;
 import org.nfpj.utils.PageIterator;
@@ -128,6 +129,17 @@ public class ArrayIteratorDescendingTestParams {
                         Character... c) {
                     return new ArrayPageIteratorDescendingWithSize<Character>(
                             c, fromIndex, toIndex);
+                }
+            },
+            new IteratorWithSizeTestFactory() {
+                @Override
+                public String getName() {
+                    return ArrayIteratorDescendingWithSize.class.getSimpleName();
+                }
+
+                @Override
+                public IteratorWithSize<Character> getWithSize(Character... c) {
+                    return new ArrayIteratorDescendingWithSize<Character>(c);
                 }
             }
         };
