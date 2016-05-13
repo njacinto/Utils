@@ -21,15 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.nfpj.utils;
-
-import java.util.Iterator;
+package org.nfpj.utils.arrays;
 
 /**
  *
  * @author njacinto
+ * @param <T> the type of object being returned by this iterator
  */
-public interface IteratorTestFactory {
-    String getName();
-    Iterator<Character> get(Character ... c);
+public class ArrayIteratorDescending<T> extends ArrayIterator<T> {
+
+    // <editor-fold defaultstate="expanded" desc="Constructors">
+    /**
+     * Creates an instance of this class
+     * 
+     * @param array the array from where this instance will extract the elements
+     */
+    public ArrayIteratorDescending(T[] array) {
+        super(array, (array==null ? 0 : array.length));
+    }
+    // </editor-fold>
+    // <editor-fold defaultstate="collapsed" desc="Protected methods">
+    /**
+     * Searches for the next element that matches the filtering conditions and
+     * returns it.
+     * 
+     * @param currIndex
+     * @return the next element that matches the filtering conditions or null
+     *          if no more elements are available
+     */
+    @Override
+    protected int getNextIndex(int currIndex){
+        if(currIndex!=END_OF_ITERATION){
+            for(int i=currIndex-1; i>-1; i--){
+                return i;
+            }
+        }
+        return END_OF_ITERATION;
+    }
+    // </editor-fold>
 }
